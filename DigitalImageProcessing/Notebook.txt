@@ -1,6 +1,0 @@
-Google Classroom Invitation Code: 4e2gsbd
-
-Day 1:
-- Introduction
-- Image pyramid
-- Python libs: opencv, numpy, matplotlib, scipy
