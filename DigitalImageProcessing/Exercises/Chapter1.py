@@ -5,7 +5,7 @@ import os
 
 # Datasets path definition
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
-dataset_path = os.path.join(r"..\datasets\Chapter.1")
+dataset_path = os.path.join(r"samples")
 
 # Images read
 images = []
@@ -20,7 +20,7 @@ print("Number of Images: {}".format(len(images)))
 
 # Plot Images
 plt.figure("Images Gallery", (13, 6))
-for i in range(1, 15):
+for i in range(1, len(images)+1):
     plt.subplot(3, 5, i)
     plt.imshow(images[i-1], interpolation="nearest")
     plt.axis('off')
