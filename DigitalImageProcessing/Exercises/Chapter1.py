@@ -16,5 +16,14 @@ for t in ("*.jpg", "*.png", "*.tif"):
         if (os.path.isfile(img)):
             images.append(cv2.imread(img))
 
+print("Number of Images: {}".format(len(images)))
 
-print(len(images))
+# Plot Images
+plt.figure("Images Gallery", (13, 6))
+for i in range(1, 15):
+    plt.subplot(3, 5, i)
+    plt.imshow(images[i-1], interpolation="nearest")
+    plt.axis('off')
+
+plt.tight_layout(pad=0.5, h_pad=0, w_pad=0)
+plt.show()
