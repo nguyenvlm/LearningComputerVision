@@ -1,0 +1,22 @@
+<RCC>
+  <qresource prefix="icon">
+    <file>img/dark/save_alt.svg</file>
+    <file>img/dark/restore.svg</file>
+    <file>img/dark/contrast.svg</file>
+    <file>img/dark/eq.svg</file>
+    <file>img/dark/exit.svg</file>
+    <file>img/dark/gray.svg</file>
+    <file>img/dark/info.svg</file>
+    <file>img/dark/invert_color.svg</file>
+    <file>img/dark/iso.svg</file>
+    <file>img/dark/logo.svg</file>
+    <file>img/dark/maximize.svg</file>
+    <file>img/dark/minimize.svg</file>
+    <file>img/dark/opacity.svg</file>
+    <file>img/dark/redo.svg</file>
+    <file>img/dark/open.svg</file>
+    <file>img/dark/save.svg</file>
+    <file>img/dark/setting.svg</file>
+    <file>img/dark/undo.svg</file>
+  </qresource>
+</RCC>

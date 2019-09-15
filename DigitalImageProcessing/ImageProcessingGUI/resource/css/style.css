@@ -1,0 +1,45 @@
+QToolButton {
+	background-color: transparent;
+}
+
+QToolButton:hover {
+	background-color: rgba(224, 229, 233, 0.109);
+}
+
+#title_bar {
+	background-color: #23272A;
+}
+
+#title_bar QLabel {
+	color: #535B5E;
+	font-weight: bold;
+}
+
+#menu_bar {
+	background-color: #2C2F33;
+}
+
+#menu_bar QFrame {
+ background-color: #23272A;
+}
+
+QMdiArea {
+	background-color: #FFFFFF;
+}
+
+#workspace {
+	background-color: #36393F;
+}
+
+QDockWidget {
+	color: #FFFFFF;
+	background-color: #23272A;
+}
+
+QDockWidget #tool_box_content {
+	background-color: #2F3136;
+}
+
+QMdiSubWindow *{
+ background-color: #40444B;
+}
