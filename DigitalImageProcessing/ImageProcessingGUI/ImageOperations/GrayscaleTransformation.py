@@ -12,7 +12,7 @@ def invert(image):
 def logTransform(image, c=2):
     return np.float32(c*np.log1p(image+1))
 
-def expoTransform(image, gamma=0.8, c=2): # gamma correction
+def expoTransform(image, gamma=0.8, c=1): # gamma correction
     return c*image**gamma
 
 def contrastAutoAdjust(image):
@@ -32,6 +32,6 @@ def histogramEqualize(image, adaptive_size='full'):
                 hist = np.histogram(single_channel, range=(0, 256), bins=256)[0]
                 hist = np.cumsum(hist)
                 hist = np.int32(hist/np.amax(hist)*255)
-                image[x:x+h, y:y+w, i] = (np.vectorize(lambda p: hist[p])(single_channel))
-                print(image[x:x+h, y:y+w, i].shape, x, y)
+                image[x:x+h, y:y+w, i] = np.vectorize(lambda p: hist[int(p)])(single_channel)
+                # print(image[x:x+h, y:y+w, i].shape, x, y)
     return image
