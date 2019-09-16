@@ -7,18 +7,19 @@ def toGrayscale(image):
     return np.stack((gray,)*3, axis=-1)
 
 def invert(image):
-    return ~image
+    return np.uint8(255-image)
 
 def logTransform(image, c=2):
-    return np.float32(c*np.log1p(image+1))
+    return np.uint8(c*np.log1p(image+1))
 
 def expoTransform(image, gamma=0.8, c=1): # gamma correction
-    return c*image**gamma
+    return np.uint8(c*(image+1)**gamma)
 
 def contrastAutoAdjust(image):
-    gray_image = toGrayscale(image)
-    gmax, gmin = np.amax(gray_image), np.amin(gray_image)
-    return 255/(gmax-gmin) * (image-gmin)
+    for c in range(image.shape[-1]):
+        gmax, gmin = np.amax(image[:,:,c]), np.amin(image[:,:,c])
+        image[:,:,c] = np.uint8(255/(gmax-gmin) * (image[:,:,c]-gmin))
+    return image
 
 def histogramEqualize(image, adaptive_size='full'):
     r,c,channel = image.shape
@@ -31,7 +32,7 @@ def histogramEqualize(image, adaptive_size='full'):
                 single_channel = image[x:x+h, y:y+w, i]
                 hist = np.histogram(single_channel, range=(0, 256), bins=256)[0]
                 hist = np.cumsum(hist)
-                hist = np.int32(hist/np.amax(hist)*255)
+                hist = np.uint8(hist/np.amax(hist)*255)
                 image[x:x+h, y:y+w, i] = np.vectorize(lambda p: hist[int(p)])(single_channel)
                 # print(image[x:x+h, y:y+w, i].shape, x, y)
     return image

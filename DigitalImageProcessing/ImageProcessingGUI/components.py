@@ -23,8 +23,10 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
         self.btn_resize.clicked.connect(self.__toggle_fullscreen__)
         self.btn_open.clicked.connect(self.__open_image__)
         self.btn_gray.clicked.connect(self.__convert_grayscale__)
-        self.btn_contrast.clicked.connect(self.__gamma_correction__)
+        self.btn_invcolor.clicked.connect(self.__invert_color__)
+        self.btn_contrast.clicked.connect(self.__gamma_correct__)
         self.btn_eq.clicked.connect(self.__histogram_equalize__)
+        self.btn_iso.clicked.connect(self.__contrast_auto_adjust__)
 
     def __init_workspace__(self):
         self.__setup_tool_box__()
@@ -113,9 +115,9 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
         self.btn_opacity.setToolTip(
             _translate("main_window", "Change Opacity"))
         self.btn_iso.setToolTip(_translate(
-            "main_window", "ISO"))
+            "main_window", "Apply Contrast Auto Adjustment"))
         self.btn_contrast.setToolTip(_translate(
-            "main_window", "Apply Contrast Correction"))
+            "main_window", "Apply Gamma Correction"))
         self.btn_eq.setToolTip(_translate(
             "main_window", "Apply Histogram Equalization"))
 
@@ -175,15 +177,22 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
     def __convert_grayscale__(self):
         self.result_image = gt.toGrayscale(self.result_image)
         self.result_viewer.load_image(self.result_image)
+    
+    def __invert_color__(self):
+        self.result_image = gt.invert(self.result_image)
+        self.result_viewer.load_image(self.result_image)
 
-    def __gamma_correction__(self):
+    def __gamma_correct__(self):
         self.result_image = gt.expoTransform(self.result_image, gamma=0.9)
         self.result_viewer.load_image(self.result_image)
 
     def __histogram_equalize__(self):
         self.result_image = gt.histogramEqualize(self.result_image)
         self.result_viewer.load_image(self.result_image)
-
+    
+    def __contrast_auto_adjust__(self):
+        self.result_image = gt.contrastAutoAdjust(self.result_image)
+        self.result_viewer.load_image(self.result_image)
 
 class ImageMdi(QtWidgets.QMdiSubWindow):
     def __init__(self, parent, label):
