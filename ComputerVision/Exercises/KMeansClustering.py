@@ -54,7 +54,7 @@ class KMCClassifier:
 
 def generateRandomData(samples = 100, dim = 2, clusters = 0, low=0.0, high=1.0):
     if clusters <= 0:
-        return np.random.uniform(low=0.0, high=10.0, size=(samples, dim))
+        return np.random.uniform(low=low, high=high, size=(samples, dim))
     
     means = generateRandomData(samples=clusters)
     cov = [[high,low], [low,high]]
