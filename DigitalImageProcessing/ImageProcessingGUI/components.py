@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore, uic
 
 from lib.gui import Ui_main_window
 from lib import imtools
+from ImageOperations import GrayscaleTransformation as gt
 
 
 class MainWindow(QtWidgets.QWidget, Ui_main_window):
@@ -22,6 +23,8 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
         self.btn_resize.clicked.connect(self.__toggle_fullscreen__)
         self.btn_open.clicked.connect(self.__open_image__)
         self.btn_gray.clicked.connect(self.__convert_grayscale__)
+        self.btn_contrast.clicked.connect(self.__gamma_correction__)
+        self.btn_eq.clicked.connect(self.__histogram_equalize__)
 
     def __init_workspace__(self):
         self.__setup_tool_box__()
@@ -163,20 +166,22 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
             self.open_image = cv2.imread(self.open_file_name)
 
             self.image_viewer = ImageMdi(self.mdi_area, "Input")
-            self.mdi_area.addSubWindow(self.image_viewer,
-                                       QtCore.Qt.WindowTitleHint)
-
             self.image_viewer.load_image(self.open_image)
 
             self.result_image = self.open_image
             self.result_viewer = ImageMdi(self.mdi_area, "Processed Result")
-            self.mdi_area.addSubWindow(self.result_viewer,
-                                       QtCore.Qt.WindowTitleHint)
-
             self.result_viewer.load_image(self.result_image)
 
     def __convert_grayscale__(self):
-        self.result_image = imtools.to_grayscale(self.result_image)
+        self.result_image = gt.toGrayscale(self.result_image)
+        self.result_viewer.load_image(self.result_image)
+
+    def __gamma_correction__(self):
+        self.result_image = gt.expoTransform(self.result_image, gamma=0.9)
+        self.result_viewer.load_image(self.result_image)
+
+    def __histogram_equalize__(self):
+        self.result_image = gt.histogramEqualize(self.result_image)
         self.result_viewer.load_image(self.result_image)
 
 
@@ -184,12 +189,13 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
     def __init__(self, parent, label):
         super(ImageMdi, self).__init__(parent)
         self.parent = parent
+        self.parent.addSubWindow(self, QtCore.Qt.WindowTitleHint)
 
         # self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
         self.setWindowTitle(label)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.setOption(QtWidgets.QMdiSubWindow.RubberBandMove)
-        self.setOption(QtWidgets.QMdiSubWindow.RubberBandResize)
+        # self.setOption(QtWidgets.QMdiSubWindow.RubberBandMove)
+        # self.setOption(QtWidgets.QMdiSubWindow.RubberBandResize)
 
         self.content = QtWidgets.QWidget(self)
 
@@ -217,3 +223,8 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         self.canvas.setMaximumSize(width, height)
         self.resize(width + 30, height + 50)
         self.show()
+
+
+class SliderMdi(QtWidgets.QMdiSubWindow):
+    def __init__(self, parent, label):
+        super(SliderMdi, self).__init__()
