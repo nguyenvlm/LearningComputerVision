@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from math import sin, cos, radians, pi, sqrt
+import math
 
 def translate(image, delta_x=0, delta_y=0):
     T = np.float32(
@@ -11,14 +11,14 @@ def translate(image, delta_x=0, delta_y=0):
     return cv2.warpAffine(image, T, (c,r))
 
 def rotate(image, theta=0, clockwise=False, scale='auto'):
-    theta = radians(theta%360)
+    theta = math.radians(theta%360)
     if clockwise:
-        theta = 2*pi - theta
+        theta = 2*math.pi - theta
     if scale == 'auto':
-        scale = sin(theta) + cos(theta)
+        scale = math.sin(theta) + math.cos(theta)
     r, c = image.shape[:2]
     center_x, center_y = c/2, r/2
-    a, b = scale*cos(theta), scale*sin(theta)
+    a, b = scale*math.cos(theta), scale*math.sin(theta)
     T = np.float32(
         [[a, b, (1-a)*center_x-b*center_y], 
         [-b, a, b*center_x+(1-a)*center_y]]
