@@ -2,7 +2,8 @@ import numpy as np
 import cv2
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
 
-from lib.gui.mainwindow import Ui_main_window
+from lib.gui import Ui_main_window
+from lib import imtools
 
 
 class MainWindow(QtWidgets.QWidget, Ui_main_window):
@@ -175,13 +176,7 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
             self.result_viewer.load_image(self.result_image)
 
     def __convert_grayscale__(self):
-        gray = cv2.cvtColor(self.result_image, cv2.COLOR_BGR2GRAY)
-        img = np.zeros_like(self.result_image)
-        img[:, :, 0] = gray
-        img[:, :, 1] = gray
-        img[:, :, 2] = gray
-        self.result_image = _
-        print(self.result_image.shape)
+        self.result_image = imtools.to_grayscale(self.result_image)
         self.result_viewer.load_image(self.result_image)
 
 

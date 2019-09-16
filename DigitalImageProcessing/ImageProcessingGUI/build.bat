@@ -1,4 +1,4 @@
-if not exist ".\lib\gui" mkdir lib\gui
+if not exist ".\lib" mkdir lib;
 
-pyuic5 -o .\lib\gui\mainwindow.py .\resource\xml\mainwindow.ui --resource-suffix=""
-pyrcc5 -o .\darkmode.py .\resource\darkmode.qrc
+call pyuic5 -o .\lib\gui.py .\resource\xml\mainwindow.ui --resource-suffix=""
+call pyrcc5 -o .\darkmode.py .\resource\darkmode.qrc
