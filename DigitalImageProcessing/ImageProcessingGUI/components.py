@@ -176,10 +176,10 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
 
     def __convert_grayscale__(self):
         gray = cv2.cvtColor(self.result_image, cv2.COLOR_BGR2GRAY)
-        _ = np.zeros_like(self.result_image)
-        _[:, :, 0] = gray
-        _[:, :, 1] = gray
-        _[:, :, 2] = gray
+        img = np.zeros_like(self.result_image)
+        img[:, :, 0] = gray
+        img[:, :, 1] = gray
+        img[:, :, 2] = gray
         self.result_image = _
         print(self.result_image.shape)
         self.result_viewer.load_image(self.result_image)
