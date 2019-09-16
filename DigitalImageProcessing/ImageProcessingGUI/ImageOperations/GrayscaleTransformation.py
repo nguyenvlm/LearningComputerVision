@@ -15,9 +15,11 @@ def logTransform(image, c=2):
 def expoTransform(image, gamma=0.8, c=2): # gamma correction
     return c*image**gamma
 
-def contrastAutoAdjustment(image):
+def contrastAutoAdjust(image):
     gray_image = toGrayscale(image)
+    gmax, gmin = np.amax(gray_image), np.amin(gray_image)
+    return 255/(gmax-gmin) * (image-gmin)
 
 if __name__ == "__main__":
     org = cv2.imread("hello.jpg")
-    cv2.imwrite("result.jpg", toGrayscale(org))
+    cv2.imwrite("result.jpg", contrastAutoAdjust(org))
