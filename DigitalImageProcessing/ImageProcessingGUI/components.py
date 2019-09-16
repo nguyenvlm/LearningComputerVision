@@ -1,5 +1,7 @@
+import os
 import numpy as np
 import cv2
+import deque
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
 
 from lib.gui import Ui_main_window
@@ -165,19 +167,19 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
                                                                        "Open Image...", filter="Image formats: *.png; *.jpg; *.tif")
 
         if (self.open_file_name):
-            self.open_image = cv2.imread(self.open_file_name)
+            # self.open_image = cv2.imread(self.open_file_name, -1)
 
-            self.image_viewer = ImageMdi(self.mdi_area, "Input")
-            self.image_viewer.load_image(self.open_image)
+            self.image_viewer = ImageMdi(self.mdi_area, self.open_file_name)
+            # self.image_viewer.load_image(self.open_image)
 
-            self.result_image = self.open_image
-            self.result_viewer = ImageMdi(self.mdi_area, "Processed Result")
-            self.result_viewer.load_image(self.result_image)
+            # self.result_image = self.open_image
+            # self.result_viewer = ImageMdi(self.mdi_area, "Processed Result")
+            # self.result_viewer.load_image(self.result_image)
 
     def __convert_grayscale__(self):
         self.result_image = gt.toGrayscale(self.result_image)
         self.result_viewer.load_image(self.result_image)
-    
+
     def __invert_color__(self):
         self.result_image = gt.invert(self.result_image)
         self.result_viewer.load_image(self.result_image)
@@ -189,22 +191,77 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
     def __histogram_equalize__(self):
         self.result_image = gt.histogramEqualize(self.result_image)
         self.result_viewer.load_image(self.result_image)
-    
+
     def __contrast_auto_adjust__(self):
         self.result_image = gt.contrastAutoAdjust(self.result_image)
         self.result_viewer.load_image(self.result_image)
 
+
 class ImageMdi(QtWidgets.QMdiSubWindow):
-    def __init__(self, parent, label):
+    def __init__(self, parent, file_path, is_main=True, image=None):
         super(ImageMdi, self).__init__(parent)
         self.parent = parent
         self.parent.addSubWindow(self, QtCore.Qt.WindowTitleHint)
 
-        # self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
-        self.setWindowTitle(label)
+        self._is_main = is_main
+        self.file_path = file_path
+
+        self.__setup_window__()
+
+        if image is None:
+            self.__open_image__()
+        else:
+            self.image = image
+
+        self.show_image()
+        self.show()
+
+        if self._is_main:
+            self._sub_result = ImageMdi(self.parent,
+                                        self.file_path,
+                                        False, self.image)
+        else:
+            self._change_history = deque()
+
+    def show_image(self):
+        height, width, channel = self.image.shape
+
+        bytes_per_line = channel * width
+        qimage = QtGui.QImage(self.image, width, height,
+                              bytes_per_line,
+                              QtGui.QImage.Format_ARGB32)
+
+        pixmap = QtGui.QPixmap.fromImage(qimage)
+
+        self.canvas.setPixmap(pixmap)
+
+        self.canvas.setFixedSize(width, height)
+        self.canvas.setMaximumSize(width, height)
+        self.resize(width + 30, height + 50)
+        self.repaint()
+
+    def __open_image__(self):
+        image = QtGui.QImage(self.file_path)
+
+        if image.format() != QtGui.QImage.Format_ARGB32:
+            image.convertTo(QtGui.QImage.Format_ARGB32)
+
+        width = image.width()
+        height = image.height()
+
+        ptr = image.bits()
+        ptr.setsize(height * width * 4)
+
+        self.image = np.frombuffer(ptr, np.uint8).reshape((height, width, 4))
+        self.qimage = image
+
+    def __setup_window__(self):
+        _, file_name = os.path.split(self.file_path)
+
+        win_type = "Result: " if not self._is_main else ""
+
+        self.setWindowTitle(win_type + file_name)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        # self.setOption(QtWidgets.QMdiSubWindow.RubberBandMove)
-        # self.setOption(QtWidgets.QMdiSubWindow.RubberBandResize)
 
         self.content = QtWidgets.QWidget(self)
 
@@ -216,22 +273,6 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         layout.addWidget(self.canvas, 0, 0, 1, 1)
 
         self.setWidget(self.content)
-
-    def load_image(self, img):
-        height, width, _ = img.shape
-        bytesPerLine = 3 * width
-
-        img = np.require(img, np.uint8, 'C')
-        parsed_img = QtGui.QImage(img, width, height,
-                                  bytesPerLine, QtGui.QImage.Format_RGB888).rgbSwapped()
-        self.canvas.setPixmap(QtGui.QPixmap.fromImage(parsed_img))
-
-        # print(height, width)
-
-        self.canvas.setFixedSize(width, height)
-        self.canvas.setMaximumSize(width, height)
-        self.resize(width + 30, height + 50)
-        self.show()
 
 
 class SliderMdi(QtWidgets.QMdiSubWindow):
