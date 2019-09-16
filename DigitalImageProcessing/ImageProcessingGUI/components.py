@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import cv2
-import deque
+from collections import deque
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
 
 from lib.gui import Ui_main_window
