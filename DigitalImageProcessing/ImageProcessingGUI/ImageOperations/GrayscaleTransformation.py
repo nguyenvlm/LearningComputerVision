@@ -20,6 +20,18 @@ def contrastAutoAdjust(image):
     gmax, gmin = np.amax(gray_image), np.amin(gray_image)
     return 255/(gmax-gmin) * (image-gmin)
 
-if __name__ == "__main__":
-    org = cv2.imread("hello.jpg")
-    cv2.imwrite("result.jpg", contrastAutoAdjust(org))
+def histogramEqualize(image, adaptive_size='full'):
+    r,c,channel = image.shape
+    if adaptive_size == 'full':
+        adaptive_size = (r,c)
+    h, w = adaptive_size
+    for x in range(0,r-h+1):
+        for y in range(0,c-w+1):
+            for i in range(channel):
+                single_channel = image[x:x+h, y:y+w, i]
+                hist = np.histogram(single_channel, range=(0, 256), bins=256)[0]
+                hist = np.cumsum(hist)
+                hist = np.int32(hist/np.amax(hist)*255)
+                image[x:x+h, y:y+w, i] = (np.vectorize(lambda p: hist[p])(single_channel))
+                print(image[x:x+h, y:y+w, i].shape, x, y)
+    return image
