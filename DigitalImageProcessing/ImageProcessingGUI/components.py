@@ -190,7 +190,6 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
         # self.result_viewer.load_image(self.result_image)
         self.mdi_area.currentSubWindow().apply_histogram_equalize()
 
-
     def __contrast_auto_adjust__(self):
         self.result_image = gt.contrastAutoAdjust(self.result_image)
         self.result_viewer.load_image(self.result_image)
@@ -304,7 +303,7 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         if self._is_main:
             self._sub_result.apply_histogram_equalize()
         else:
-            self.image = gt.histogramEqualize(self.image)
+            self.image = gt.histogramEqualize(self.image, (128, 128))
             self.show_image()
 
 
