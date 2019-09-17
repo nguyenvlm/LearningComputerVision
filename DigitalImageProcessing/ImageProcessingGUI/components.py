@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import cv2
-import deque
+from collections import deque
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
 
 from lib.gui import Ui_main_window
@@ -16,6 +16,8 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
         self.setupUi(self)
 
         self.workspace.setWindowFlags(QtCore.Qt.Widget)
+
+        self._open_image = []
 
         self.__setup_mouse_event__()
         self.__init_workspace__()
@@ -163,22 +165,17 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
             self.btn_resize.setIcon(icon)
 
     def __open_image__(self):
-        self.open_file_name, _ = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                                       "Open Image...", filter="Image formats: *.png; *.jpg; *.tif")
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                             "Open Image...", filter="Image formats: *.png; *.jpg; *.tif")
 
-        if (self.open_file_name):
-            # self.open_image = cv2.imread(self.open_file_name, -1)
-
-            self.image_viewer = ImageMdi(self.mdi_area, self.open_file_name)
-            # self.image_viewer.load_image(self.open_image)
-
-            # self.result_image = self.open_image
-            # self.result_viewer = ImageMdi(self.mdi_area, "Processed Result")
-            # self.result_viewer.load_image(self.result_image)
+        if (file_path):
+            self._open_image.append(
+                ImageMdi(self.mdi_area, file_path))
 
     def __convert_grayscale__(self):
-        self.result_image = gt.toGrayscale(self.result_image)
-        self.result_viewer.load_image(self.result_image)
+        self.mdi_area.currentSubWindow().hide()
+        # self.result_image = gt.toGrayscale(self.result_image)
+        # self.result_viewer.load_image(self.result_image)
 
     def __invert_color__(self):
         self.result_image = gt.invert(self.result_image)
@@ -189,8 +186,10 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
         self.result_viewer.load_image(self.result_image)
 
     def __histogram_equalize__(self):
-        self.result_image = gt.histogramEqualize(self.result_image)
-        self.result_viewer.load_image(self.result_image)
+        # self.result_image = gt.histogramEqualize(self.result_image)
+        # self.result_viewer.load_image(self.result_image)
+        self.mdi_area.currentSubWindow().apply_histogram_equalize()
+
 
     def __contrast_auto_adjust__(self):
         self.result_image = gt.contrastAutoAdjust(self.result_image)
@@ -201,7 +200,6 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
     def __init__(self, parent, file_path, is_main=True, image=None):
         super(ImageMdi, self).__init__(parent)
         self.parent = parent
-        self.parent.addSubWindow(self, QtCore.Qt.WindowTitleHint)
 
         self._is_main = is_main
         self.file_path = file_path
@@ -222,6 +220,7 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
                                         False, self.image)
         else:
             self._change_history = deque()
+            self._file_changed = False
 
     def show_image(self):
         height, width, channel = self.image.shape
@@ -256,8 +255,10 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         self.qimage = image
 
     def __setup_window__(self):
-        _, file_name = os.path.split(self.file_path)
+        flags = QtCore.Qt.WindowTitleHint if self._is_main else QtCore.Qt.CustomizeWindowHint
+        self.parent.addSubWindow(self, flags)
 
+        _, file_name = os.path.split(self.file_path)
         win_type = "Result: " if not self._is_main else ""
 
         self.setWindowTitle(win_type + file_name)
@@ -273,6 +274,38 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         layout.addWidget(self.canvas, 0, 0, 1, 1)
 
         self.setWidget(self.content)
+
+    def save(self):
+        pass
+
+    def closeEvent(self, event):
+        if not self._is_main:
+            return
+
+        print(self._sub_result._file_changed)
+        if self._sub_result._file_changed:
+            choice = QtWidgets.QMessageBox.question(self.parent, "File not save!",
+                                                    "File {} was not save!\n Do you want to Save change?".format(
+                                                        self.file_path),
+                                                    QtWidgets.QMessageBox.Save |
+                                                    QtWidgets.QMessageBox.Discard |
+                                                    QtWidgets.QMessageBox.Cancel)
+
+            print(choice)
+            if choice == QtWidgets.QMessageBox.Cancel:
+                event.ignore()
+                return
+            elif choice == QtWidgets.QMessageBox.Save:
+                self._sub_result.save()
+
+            self._sub_result.close()
+
+    def apply_histogram_equalize(self):
+        if self._is_main:
+            self._sub_result.apply_histogram_equalize()
+        else:
+            self.image = gt.histogramEqualize(self.image)
+            self.show_image()
 
 
 class SliderMdi(QtWidgets.QMdiSubWindow):
