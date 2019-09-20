@@ -303,7 +303,7 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         if self._is_main:
             self._sub_result.apply_histogram_equalize()
         else:
-            self.image = gt.histogramEqualize(self.image, (128, 128))
+            self.image = gt.histogramEqualize(self.image)
             self.show_image()
 
 

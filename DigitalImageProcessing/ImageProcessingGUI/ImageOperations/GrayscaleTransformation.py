@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import math
+import matplotlib.pyplot as plt
 
 
 def toGrayscale(image):
@@ -32,15 +33,23 @@ def histogramEqualize(image, adaptive_size='full'):
     if adaptive_size == 'full':
         adaptive_size = (r, c)
     h, w = adaptive_size
-    for x in range(0, r-h+1, h):
-        for y in range(0, c-w+1, w):
+    for x in range(0, r, h):
+        for y in range(0, c, w):
             for i in range(channel):
                 single_channel = image[x:min(x+h, r), y:min(y+w, c), i]
                 hist = np.histogram(
                     single_channel, range=(0, 256), bins=256)[0]
                 hist = np.cumsum(hist)
                 hist = np.uint8(hist/np.amax(hist)*255)
+                # plt.hist(single_channel, bins=255, range=(0, 255))
+                # plt.show()
                 image[x:min(x+h, r), y:min(y+w, c),
                       i] = np.vectorize(lambda p: hist[int(p)])(single_channel)
+                print(single_channel.shape, i)
                 # print(image[x:x+h, y:y+w, i].shape, x, y)
     return image
+
+
+if __name__ == "__main__":
+    img = cv2.imread("hello.jpg")
+    cv2.imwrite("output.jpg", histogramEqualize(img, (2, 1)))
