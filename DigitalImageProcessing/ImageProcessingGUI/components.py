@@ -5,7 +5,6 @@ from collections import deque
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
 
 from lib.gui import Ui_main_window
-from lib import imtools
 from ImageOperations import GrayscaleTransformation as gt
 
 
@@ -278,10 +277,6 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         pass
 
     def closeEvent(self, event):
-        if not self._is_main:
-            return
-
-        print(self._sub_result._file_changed)
         if self._sub_result._file_changed:
             choice = QtWidgets.QMessageBox.question(self.parent, "File not save!",
                                                     "File {} was not save!\n Do you want to Save change?".format(
@@ -297,13 +292,14 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
             elif choice == QtWidgets.QMessageBox.Save:
                 self._sub_result.save()
 
-            self._sub_result.close()
+        self._sub_result.close()
 
     def apply_histogram_equalize(self):
         if self._is_main:
             self._sub_result.apply_histogram_equalize()
         else:
-            self.image = gt.histogramEqualize(self.image)
+            self.image = gt.histogramEqualize(
+                self.image, adaptive_size=(128, 128))
             self.show_image()
 
 
