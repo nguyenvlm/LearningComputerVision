@@ -6,7 +6,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore, uic
 from ImageOperations import GrayscaleTransformation as gt
 from ImageOperations import SpatialDomainFilter as sdf
 
-class Dotdict(dict):
+class DotDict(dict):
     """
     a dictionary that supports dot notation
     as well as dictionary access notation
@@ -36,7 +36,7 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         self.__setup_window__()
 
         if image is None:
-            self.__open_image__()
+            self.image = self.__open_image__()
         else:
             self._raw = image
             self.image = image.image
@@ -75,19 +75,24 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         self.setWidget(self.content)
 
     def __open_image__(self):
+        r_image = DotDict()
         image = QtGui.QImage(self.file_path)
 
         if image.format() != QtGui.QImage.Format_RGBA8888:
             image.convertTo(QtGui.QImage.Format_RGBA8888)
 
-        width = image.width()
-        height = image.height()
+        r_image.width = image.width()
+        r_image.height = image.height()
 
-        ptr = image.bits()
-        ptr.setsize(height * width * 4)
+        ptr = image.constBits()
+        ptr.setsize(r_image.height * r_image.width * 4)
 
-        self.image = np.frombuffer(ptr, np.uint8).reshape((height, width, 4))
-        self.qimage = image
+        np_image = np.frombuffer(ptr, np.uint8).reshape((r_image.height, r_image.width, 4))
+
+        r_image.rgb = np_image[:,:,:3].copy()
+        r_image.alpha = np_image[:,:,-1].copy()
+        
+        return r_image
 
     def __set_image__(self, image, is_undo=False, is_redo=False):
         if is_undo:
@@ -100,21 +105,31 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         self.image = image
         self.__show_image__()
 
-    def __show_image__(self):
-        height, width, channel = self.image.shape
+    def __get_pixmap__(self):
+        # print(self.image.rgb.shape, self.image.alpha.shape)
+        image = np.dstack((self.image.rgb, self.image.alpha))
+
+        height, width, channel = image.shape
+
+        # print(height, width, channel)
 
         bytes_per_line = channel * width
-        qimage = QtGui.QImage(self.image, width, height,
+        qimage = QtGui.QImage(image, width, height,
                               bytes_per_line,
                               QtGui.QImage.Format_RGBA8888)
 
         pixmap = QtGui.QPixmap.fromImage(qimage)
+        
+        return pixmap
+
+    def __show_image__(self):
+        pixmap = self.__get_pixmap__()
 
         self.canvas.setPixmap(pixmap)
 
-        self.canvas.setFixedSize(width, height)
-        self.canvas.setMaximumSize(width, height)
-        self.resize(width + 30, height + 50)
+        self.canvas.setFixedSize(self.image.width, self.image.height)
+        self.canvas.setMaximumSize(self.image.width, self.image.height)
+        self.resize(self.image.width + 30, self.image.height + 50)
         self.repaint()
 
     def save(self):
@@ -174,28 +189,32 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         if self._is_main:
             self._result.apply_histogram_equalize()
         else:
-            image = gt.histogramEqualize(self.image, adaptive_size="full")
+            image = DotDict(self.image)
+            image.rgb = gt.histogramEqualize(self.image.rgb, adaptive_size="full")
             self.__set_image__(image)
     
     def apply_grayscale(self):
         if self._is_main:
             self._result.apply_grayscale()
         else:
-            image = gt.toGrayscale(self.image)
+            image = DotDict(self.image)
+            image.rgb = gt.toGrayscale(self.image.rgb)
             self.__set_image__(image)
 
     def apply_contrast_auto_adjust(self):
         if self._is_main:
             self._result.apply_grayscale()
         else:
-            image = gt.contrastAutoAdjust(self.image)
+            image = DotDict(self.image)
+            image.rgb = gt.contrastAutoAdjust(self.image.rgb)
             self.__set_image__(image)
 
     def apply_gamma_correction(self):
         if self._is_main:
             self._result.apply_grayscale()
         else:
-            image = gt.expoTransform(self.image)
+            image = DotDict(self.image)
+            image.rgb = gt.expoTransform(self.image.rgb)
             self.__set_image__(image)
             
     
@@ -203,54 +222,62 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         if self._is_main:
             self._result.apply_grayscale()
         else:
-            image = gt.invert(self.image)
+            image = DotDict(self.image)
+            image.rgb = gt.invert(self.image.rgb)
             self.__set_image__(image)
 
     def apply_mean_filter(self):
         if self._is_main:
             self._result.apply_mean_filter()
         else:
-            image = sdf.meanFilter(self.image)
+            image = DotDict(self.image)
+            image.rgb = sdf.meanFilter(self.image.rgb)
             self.__set_image__(image)
 
     def apply_median_filter(self):
         if self._is_main:
             self._result.apply_median_filter()
         else:
-            image = sdf.medianFilter(self.image)
+            image = DotDict(self.image)
+            image.rgb = sdf.medianFilter(self.image.rgb)
             self.__set_image__(image)
 
     def apply_gaussian_filter(self):
         if self._is_main:
             self._result.apply_gaussian_filter()
         else:
-            image = sdf.gaussianFilter(self.image)
+            image = DotDict(self.image)
+            image.rgb = sdf.gaussianFilter(self.image.rgb)
             self.__set_image__(image)
 
     def apply_laplacian_filter(self):
         if self._is_main:
             self._result.apply_laplacian_filter()
         else:
-            image = sdf.laplacianFilter(self.image)
+            image = DotDict(self.image)
+            image.rgb = sdf.laplacianFilter(self.image.rgb)
             self.__set_image__(image)
 
     def apply_log_filter(self):
         if self._is_main:
             self._result.apply_log_filter()
         else:
-            image = sdf.LoGFilter(self.image)
+            image = DotDict(self.image)
+            image.rgb = sdf.LoGFilter(self.image.rgb)
             self.__set_image__(image)
 
     def apply_highboost_filter(self):
         if self._is_main:
             self._result.apply_highboost_filter()
         else:
-            image = sdf.highboostFilter(self.image)
+            image = DotDict(self.image)
+            image.rgb = sdf.highboostFilter(self.image.rgb)
             self.__set_image__(image)
 
     def apply_unsharp_mask_filter(self):
         if self._is_main:
             self._result.apply_unsharp_mask_filter()
         else:
-            image = sdf.unsharpMaskFilter(self.image)
+            image = DotDict(self.image)
+            image.rgb = sdf.unsharpMaskFilter(self.image.rgb)
             self.__set_image__(image)
