@@ -197,7 +197,6 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
         self.workspace.addDockWidget(
             QtCore.Qt.LeftDockWidgetArea, self.tool_box)
 
-
     def __setup_mouse_event__(self):
         self._pressing = False
 

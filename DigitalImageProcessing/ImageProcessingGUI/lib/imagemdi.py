@@ -6,6 +6,25 @@ from PyQt5 import QtWidgets, QtGui, QtCore, uic
 from ImageOperations import GrayscaleTransformation as gt
 from ImageOperations import SpatialDomainFilter as sdf
 
+class Dotdict(dict):
+    """
+    a dictionary that supports dot notation
+    as well as dictionary access notation
+    usage: d = DotDict() or d = DotDict({'val1':'first'})
+    set attributes: d.val2 = 'second' or d['val2'] = 'second'
+    get attributes: d.val2 or d['val2']
+    """
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+    def __init__(self, dct=None):
+        dct = dict() if not dct else dct
+        for key, value in dct.items():
+            if hasattr(value, 'keys'):
+                value = Dotdict(value)
+            self[key] = value
+
 class ImageMdi(QtWidgets.QMdiSubWindow):
     def __init__(self, parent, file_path, is_main=True, image=None):
         super(ImageMdi, self).__init__(parent)
@@ -22,7 +41,7 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
             self._raw = image
             self.image = image.image
 
-        self.show_image()
+        self.__show_image__()
         self.show()
 
         if self._is_main:
@@ -33,38 +52,6 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
             self._undo_stack = []
             self._redo_stack = []
             self._file_changed = False
-
-    def show_image(self):
-        height, width, channel = self.image.shape
-
-        bytes_per_line = channel * width
-        qimage = QtGui.QImage(self.image, width, height,
-                              bytes_per_line,
-                              QtGui.QImage.Format_RGBA8888)
-
-        pixmap = QtGui.QPixmap.fromImage(qimage)
-
-        self.canvas.setPixmap(pixmap)
-
-        self.canvas.setFixedSize(width, height)
-        self.canvas.setMaximumSize(width, height)
-        self.resize(width + 30, height + 50)
-        self.repaint()
-
-    def __open_image__(self):
-        image = QtGui.QImage(self.file_path)
-
-        if image.format() != QtGui.QImage.Format_RGBA8888:
-            image.convertTo(QtGui.QImage.Format_RGBA8888)
-
-        width = image.width()
-        height = image.height()
-
-        ptr = image.bits()
-        ptr.setsize(height * width * 4)
-
-        self.image = np.frombuffer(ptr, np.uint8).reshape((height, width, 4))
-        self.qimage = image
 
     def __setup_window__(self):
         flags = QtCore.Qt.WindowTitleHint if self._is_main else QtCore.Qt.CustomizeWindowHint
@@ -86,6 +73,49 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         layout.addWidget(self.canvas, 0, 0, 1, 1)
 
         self.setWidget(self.content)
+
+    def __open_image__(self):
+        image = QtGui.QImage(self.file_path)
+
+        if image.format() != QtGui.QImage.Format_RGBA8888:
+            image.convertTo(QtGui.QImage.Format_RGBA8888)
+
+        width = image.width()
+        height = image.height()
+
+        ptr = image.bits()
+        ptr.setsize(height * width * 4)
+
+        self.image = np.frombuffer(ptr, np.uint8).reshape((height, width, 4))
+        self.qimage = image
+
+    def __set_image__(self, image, is_undo=False, is_redo=False):
+        if is_undo:
+            self._redo_stack.append(self.image)
+        else:
+            self._undo_stack.append(self.image)
+            if not is_redo:
+                self._redo_stack = []
+
+        self.image = image
+        self.__show_image__()
+
+    def __show_image__(self):
+        height, width, channel = self.image.shape
+
+        bytes_per_line = channel * width
+        qimage = QtGui.QImage(self.image, width, height,
+                              bytes_per_line,
+                              QtGui.QImage.Format_RGBA8888)
+
+        pixmap = QtGui.QPixmap.fromImage(qimage)
+
+        self.canvas.setPixmap(pixmap)
+
+        self.canvas.setFixedSize(width, height)
+        self.canvas.setMaximumSize(width, height)
+        self.resize(width + 30, height + 50)
+        self.repaint()
 
     def save(self):
         pass
@@ -175,17 +205,6 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         else:
             image = gt.invert(self.image)
             self.__set_image__(image)
-
-    def __set_image__(self, image, is_undo=False, is_redo=False):
-        if is_undo:
-            self._redo_stack.append(self.image)
-        else:
-            self._undo_stack.append(self.image)
-            if not is_redo:
-                self._redo_stack = []
-
-        self.image = image
-        self.show_image()
 
     def apply_mean_filter(self):
         if self._is_main:
