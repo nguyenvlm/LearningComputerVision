@@ -1,8 +1,6 @@
 import numpy as np
 import cv2
 import math
-import matplotlib.pyplot as plt
-
 
 def toGrayscale(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -45,7 +43,6 @@ def histogramEqualize(image, stride=2, adaptive_size='full'):
                 result_image[x:min(x+h, r), y:min(y+w, c),
                              i] = np.vectorize(lambda p: hist[int(p)])(single_channel)
                 print(single_channel.shape, i)
-                # print(image[x:x+h, y:y+w, i].shape, x, y)
     return result_image
 
 
