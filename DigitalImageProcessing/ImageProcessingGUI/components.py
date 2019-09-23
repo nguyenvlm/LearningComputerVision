@@ -33,6 +33,13 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
         self.btn_contrast.clicked.connect(self.__gamma_correction__)
         self.btn_eq.clicked.connect(self.__histogram_equalize__)
         self.btn_iso.clicked.connect(self.__contrast_auto_adjust__)
+        self.btn_filter_mean.clicked.connect(self.__mean_filter__)
+        self.btn_filter_median.clicked.connect(self.__median_filter__)
+        self.btn_filter_gaussian.clicked.connect(self.__gaussian_filter__)
+        self.btn_filter_laplacian.clicked.connect(self.__laplacian_filter__)
+        self.btn_filter_LoG.clicked.connect(self.__log_filter__)
+        self.btn_filter_highboost.clicked.connect(self.__highboost_filter__)
+        self.btn_filter_unsharp_mask.clicked.connect(self.__unsharp_mask_filter__)
 
     def __setup_shortcut__(self):
         self.btn_open.setShortcut("Ctrl+O")
@@ -57,6 +64,8 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
         self.workspace.setCentralWidget(self.mdi_area)
 
     def __setup_tool_box__(self):
+        _translate = QtCore.QCoreApplication.translate
+
         self.tool_box = QtWidgets.QDockWidget(
             "Tools", self.workspace)
 
@@ -78,38 +87,105 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
         icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/gray.svg"))
         self.btn_gray.setIcon(icon)
         self.btn_gray.setIconSize(QtCore.QSize(20, 20))
+        layout.addWidget(self.btn_gray, 0, 0, 1, 1)
+        self.btn_gray.setToolTip(_translate(
+            "main_window", "Convert to Grayscale"))
 
         self.btn_invcolor = QtWidgets.QToolButton(self.tool_box_content)
         icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/invert_color.svg"))
         self.btn_invcolor.setIcon(icon)
         self.btn_invcolor.setIconSize(QtCore.QSize(20, 20))
+        layout.addWidget(self.btn_invcolor, 0, 1, 1, 1)
+        self.btn_invcolor.setToolTip(_translate(
+            "main_window", "Invert Color"))
 
         self.btn_opacity = QtWidgets.QToolButton(self.tool_box_content)
         icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/opacity.svg"))
         self.btn_opacity.setIcon(icon)
         self.btn_opacity.setIconSize(QtCore.QSize(20, 20))
+        layout.addWidget(self.btn_opacity, 1, 0, 1, 1)
+        self.btn_opacity.setToolTip(
+            _translate("main_window", "Change Opacity"))
 
         self.btn_iso = QtWidgets.QToolButton(self.tool_box_content)
         icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/iso.svg"))
         self.btn_iso.setIcon(icon)
         self.btn_iso.setIconSize(QtCore.QSize(20, 20))
+        layout.addWidget(self.btn_iso, 1, 1, 1, 1)
+        self.btn_iso.setToolTip(_translate(
+            "main_window", "Apply Contrast Auto Adjustment"))
 
         self.btn_contrast = QtWidgets.QToolButton(self.tool_box_content)
         icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/contrast.svg"))
         self.btn_contrast.setIcon(icon)
         self.btn_contrast.setIconSize(QtCore.QSize(20, 20))
+        layout.addWidget(self.btn_contrast, 2, 0, 1, 1)
+        self.btn_contrast.setToolTip(_translate(
+            "main_window", "Apply Gamma Correction"))
 
         self.btn_eq = QtWidgets.QToolButton(self.tool_box_content)
         icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/eq.svg"))
         self.btn_eq.setIcon(icon)
         self.btn_eq.setIconSize(QtCore.QSize(20, 20))
-
-        layout.addWidget(self.btn_gray, 0, 0, 1, 1)
-        layout.addWidget(self.btn_invcolor, 0, 1, 1, 1)
-        layout.addWidget(self.btn_opacity, 1, 0, 1, 1)
-        layout.addWidget(self.btn_iso, 1, 1, 1, 1)
-        layout.addWidget(self.btn_contrast, 2, 0, 1, 1)
         layout.addWidget(self.btn_eq, 2, 1, 1, 1)
+        self.btn_eq.setToolTip(_translate(
+            "main_window", "Apply Histogram Equalization"))
+
+        self.btn_filter_mean = QtWidgets.QToolButton(self.tool_box_content)
+        icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/filter.svg"))
+        self.btn_filter_mean.setIcon(icon)
+        self.btn_filter_mean.setIconSize(QtCore.QSize(20, 20))
+        layout.addWidget(self.btn_filter_mean, 3, 0, 1, 1)
+        self.btn_filter_mean.setToolTip(_translate(
+            "main_window", "Apply Mean Filter"))
+
+        self.btn_filter_median = QtWidgets.QToolButton(self.tool_box_content)
+        icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/filter.svg"))
+        self.btn_filter_median.setIcon(icon)
+        self.btn_filter_median.setIconSize(QtCore.QSize(20, 20))
+        layout.addWidget(self.btn_filter_median, 3, 1, 1, 1)
+        self.btn_filter_median.setToolTip(_translate(
+            "main_window", "Apply Median Filter"))
+
+        self.btn_filter_gaussian = QtWidgets.QToolButton(self.tool_box_content)
+        icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/filter.svg"))
+        self.btn_filter_gaussian.setIcon(icon)
+        self.btn_filter_gaussian.setIconSize(QtCore.QSize(20, 20))
+        layout.addWidget(self.btn_filter_gaussian, 4, 0, 1, 1)
+        self.btn_filter_gaussian.setToolTip(_translate(
+            "main_window", "Apply Gaussian Filter"))
+
+        self.btn_filter_laplacian = QtWidgets.QToolButton(self.tool_box_content)
+        icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/filter.svg"))
+        self.btn_filter_laplacian.setIcon(icon)
+        self.btn_filter_laplacian.setIconSize(QtCore.QSize(20, 20))
+        layout.addWidget(self.btn_filter_laplacian, 4, 1, 1, 1)
+        self.btn_filter_laplacian.setToolTip(_translate(
+            "main_window", "Apply Laplacian Filter"))
+
+        self.btn_filter_LoG = QtWidgets.QToolButton(self.tool_box_content)
+        icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/filter.svg"))
+        self.btn_filter_LoG.setIcon(icon)
+        self.btn_filter_LoG.setIconSize(QtCore.QSize(20, 20))
+        layout.addWidget(self.btn_filter_LoG, 5, 0, 1, 1)
+        self.btn_filter_LoG.setToolTip(_translate(
+            "main_window", "Apply Log Filter"))
+
+        self.btn_filter_highboost = QtWidgets.QToolButton(self.tool_box_content)
+        icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/filter.svg"))
+        self.btn_filter_highboost.setIcon(icon)
+        self.btn_filter_highboost.setIconSize(QtCore.QSize(20, 20))
+        layout.addWidget(self.btn_filter_highboost, 5, 1, 1, 1)
+        self.btn_filter_highboost.setToolTip(_translate(
+            "main_window", "Apply Highboost Filter"))
+
+        self.btn_filter_unsharp_mask = QtWidgets.QToolButton(self.tool_box_content)
+        icon = QtGui.QIcon(QtGui.QIcon(":/icon/img/dark/filter.svg"))
+        self.btn_filter_unsharp_mask.setIcon(icon)
+        self.btn_filter_unsharp_mask.setIconSize(QtCore.QSize(20, 20))
+        layout.addWidget(self.btn_filter_unsharp_mask, 6, 0, 1, 1)
+        self.btn_filter_unsharp_mask.setToolTip(_translate(
+            "main_window", "Apply Unsharp Mask Filter"))
 
         _ = QtWidgets.QSpacerItem(20, 40,
                                   QtWidgets.QSizePolicy.Minimum,
@@ -121,19 +197,6 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
         self.workspace.addDockWidget(
             QtCore.Qt.LeftDockWidgetArea, self.tool_box)
 
-        _translate = QtCore.QCoreApplication.translate
-        self.btn_gray.setToolTip(_translate(
-            "main_window", "Convert to Grayscale"))
-        self.btn_invcolor.setToolTip(_translate(
-            "main_window", "Invert Color"))
-        self.btn_opacity.setToolTip(
-            _translate("main_window", "Change Opacity"))
-        self.btn_iso.setToolTip(_translate(
-            "main_window", "Apply Contrast Auto Adjustment"))
-        self.btn_contrast.setToolTip(_translate(
-            "main_window", "Apply Gamma Correction"))
-        self.btn_eq.setToolTip(_translate(
-            "main_window", "Apply Histogram Equalization"))
 
     def __setup_mouse_event__(self):
         self._pressing = False
@@ -223,8 +286,28 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
     def __contrast_auto_adjust__(self):
         if len(self._child) > 0:
             self.mdi_area.currentSubWindow().apply_contrast_auto_adjust()
-    
-
+            
+    def __mean_filter__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().apply_mean_filter()
+    def __median_filter__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().apply_median_filter()
+    def __gaussian_filter__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().apply_gaussian_filter()
+    def __laplacian_filter__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().apply_laplacian_filter()
+    def __log_filter__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().apply_log_filter()
+    def __highboost_filter__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().apply_highboost_filter()
+    def __unsharp_mask_filter__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().apply_unsharp_mask_filter()
 
 class SliderMdi(QtWidgets.QMdiSubWindow):
     def __init__(self, parent, label):

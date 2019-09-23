@@ -4,6 +4,7 @@ from collections import deque
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
 
 from ImageOperations import GrayscaleTransformation as gt
+from ImageOperations import SpatialDomainFilter as sdf
 
 class ImageMdi(QtWidgets.QMdiSubWindow):
     def __init__(self, parent, file_path, is_main=True, image=None):
@@ -186,4 +187,51 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
         self.image = image
         self.show_image()
 
-            
+    def apply_mean_filter(self):
+        if self._is_main:
+            self._result.apply_mean_filter()
+        else:
+            image = sdf.meanFilter(self.image)
+            self.__set_image__(image)
+
+    def apply_median_filter(self):
+        if self._is_main:
+            self._result.apply_median_filter()
+        else:
+            image = sdf.medianFilter(self.image)
+            self.__set_image__(image)
+
+    def apply_gaussian_filter(self):
+        if self._is_main:
+            self._result.apply_gaussian_filter()
+        else:
+            image = sdf.gaussianFilter(self.image)
+            self.__set_image__(image)
+
+    def apply_laplacian_filter(self):
+        if self._is_main:
+            self._result.apply_laplacian_filter()
+        else:
+            image = sdf.laplacianFilter(self.image)
+            self.__set_image__(image)
+
+    def apply_log_filter(self):
+        if self._is_main:
+            self._result.apply_log_filter()
+        else:
+            image = sdf.LoGFilter(self.image)
+            self.__set_image__(image)
+
+    def apply_highboost_filter(self):
+        if self._is_main:
+            self._result.apply_highboost_filter()
+        else:
+            image = sdf.highboostFilter(self.image)
+            self.__set_image__(image)
+
+    def apply_unsharp_mask_filter(self):
+        if self._is_main:
+            self._result.apply_unsharp_mask_filter()
+        else:
+            image = sdf.unsharpMaskFilter(self.image)
+            self.__set_image__(image)

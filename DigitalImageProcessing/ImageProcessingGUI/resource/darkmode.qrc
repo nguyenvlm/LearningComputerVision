@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icon">
+    <file>img/dark/filter.svg</file>
     <file>img/dark/reset.svg</file>
     <file>img/dark/rotateL.svg</file>
     <file>img/dark/rotateR.svg</file>
