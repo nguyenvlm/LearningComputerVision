@@ -32,8 +32,8 @@ def histogramEqualize(image, stride=2, adaptive_size='full'):
     if adaptive_size == 'full':
         adaptive_size = (r, c)
     h, w = adaptive_size
-        for y in range(0, c-w+1, stride):
     for x in range(0, r-h+1, stride):
+        for y in range(0, c-w+1, stride):
             for i in range(channel):
                 single_channel = image[x:min(x+h, r), y:min(y+w, c), i]
                 hist = np.histogram(
@@ -42,7 +42,7 @@ def histogramEqualize(image, stride=2, adaptive_size='full'):
                 hist = np.uint8(hist/np.amax(hist)*255)
                 result_image[x:min(x+h, r), y:min(y+w, c),
                              i] = np.vectorize(lambda p: hist[int(p)])(single_channel)
-                print(single_channel.shape, i)
+                             
     return result_image
 
 

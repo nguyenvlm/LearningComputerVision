@@ -144,6 +144,9 @@
       </property>
       <item>
        <widget class="QToolButton" name="btn_setting">
+        <property name="toolTip">
+         <string>Setting</string>
+        </property>
         <property name="text">
          <string>Setting</string>
         </property>
@@ -169,6 +172,9 @@
       </item>
       <item>
        <widget class="QToolButton" name="btn_open">
+        <property name="toolTip">
+         <string>Open</string>
+        </property>
         <property name="text">
          <string>Open</string>
         </property>
@@ -187,6 +193,9 @@
       </item>
       <item>
        <widget class="QToolButton" name="btn_save">
+        <property name="toolTip">
+         <string>Save</string>
+        </property>
         <property name="text">
          <string>Save</string>
         </property>
@@ -205,6 +214,9 @@
       </item>
       <item>
        <widget class="QToolButton" name="btn_saveas">
+        <property name="toolTip">
+         <string>Save as</string>
+        </property>
         <property name="text">
          <string>Save as</string>
         </property>
@@ -230,6 +242,9 @@
       </item>
       <item>
        <widget class="QToolButton" name="btn_undo">
+        <property name="toolTip">
+         <string>Undo</string>
+        </property>
         <property name="text">
          <string>Undo</string>
         </property>
@@ -248,12 +263,36 @@
       </item>
       <item>
        <widget class="QToolButton" name="btn_redo">
+        <property name="toolTip">
+         <string>Redo</string>
+        </property>
         <property name="text">
          <string>Redo</string>
         </property>
         <property name="icon">
          <iconset>
           <normalon>:/icon/img/dark/redo.svg</normalon>
+         </iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="btn_reset">
+        <property name="toolTip">
+         <string>Reset Image</string>
+        </property>
+        <property name="text">
+         <string>Reset Image</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normalon>:/icon/img/dark/reset.svg</normalon>
          </iconset>
         </property>
         <property name="iconSize">

@@ -1,12 +1,7 @@
-import os
-import numpy as np
-import cv2
-from collections import deque
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
 
-from lib.gui import Ui_main_window
-from ImageOperations import GrayscaleTransformation as gt
-
+from lib.mainwindow import Ui_main_window
+from lib.imagemdi import ImageMdi
 
 class MainWindow(QtWidgets.QWidget, Ui_main_window):
     def __init__(self, *args, **kwargs):
@@ -16,22 +11,38 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
 
         self.workspace.setWindowFlags(QtCore.Qt.Widget)
 
-        self._open_image = []
+        self._child = []
 
         self.__setup_mouse_event__()
-        self.__init_workspace__()
-        self.__signal_connect__()
+        self.__setup_workspace__()
+        self.__setup_signal__()
+        self.__setup_shortcut__()
 
-    def __signal_connect__(self):
+    def __setup_signal__(self):
         self.btn_resize.clicked.connect(self.__toggle_fullscreen__)
+        
         self.btn_open.clicked.connect(self.__open_image__)
+        self.btn_save.clicked.connect(self.__save_image__)
+        self.btn_saveas.clicked.connect(self.__save_image_as__)
+        self.btn_undo.clicked.connect(self.__undo_change__)
+        self.btn_redo.clicked.connect(self.__redo_change__)
+        self.btn_reset.clicked.connect(self.__discard_change__)
+        
         self.btn_gray.clicked.connect(self.__convert_grayscale__)
         self.btn_invcolor.clicked.connect(self.__invert_color__)
-        self.btn_contrast.clicked.connect(self.__gamma_correct__)
+        self.btn_contrast.clicked.connect(self.__gamma_correction__)
         self.btn_eq.clicked.connect(self.__histogram_equalize__)
         self.btn_iso.clicked.connect(self.__contrast_auto_adjust__)
 
-    def __init_workspace__(self):
+    def __setup_shortcut__(self):
+        self.btn_open.setShortcut("Ctrl+O")
+        self.btn_save.setShortcut("Ctrl+S")
+        self.btn_saveas.setShortcut("Ctrl+Shift+S")
+        self.btn_undo.setShortcut("Ctrl+Z")
+        self.btn_redo.setShortcut("Ctrl+Y")
+        self.btn_reset.setShortcut("Ctrl+R")
+
+    def __setup_workspace__(self):
         self.__setup_tool_box__()
 
         self.mdi_area = QtWidgets.QMdiArea(self.workspace)
@@ -168,139 +179,51 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
                                                              "Open Image...", filter="Image formats: *.png; *.jpg; *.tif")
 
         if (file_path):
-            self._open_image.append(
-                ImageMdi(self.mdi_area, file_path))
+            child = ImageMdi(self.mdi_area, file_path)
+
+            def close_event(ev):
+                self._child.remove(child)
+            child.closeEvent = close_event
+            
+            self._child.append(child)
+    
+    def __save_image__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().save()
+    def __save_image_as__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().save_as()
+
+    def __undo_change__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().undo()
+    def __redo_change__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().redo()
+    def __discard_change__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().discard()
 
     def __convert_grayscale__(self):
-        self.mdi_area.currentSubWindow().hide()
-        # self.result_image = gt.toGrayscale(self.result_image)
-        # self.result_viewer.load_image(self.result_image)
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().apply_grayscale()
 
     def __invert_color__(self):
-        self.result_image = gt.invert(self.result_image)
-        self.result_viewer.load_image(self.result_image)
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().apply_invert_color()
 
-    def __gamma_correct__(self):
-        self.result_image = gt.expoTransform(self.result_image, gamma=0.9)
-        self.result_viewer.load_image(self.result_image)
+    def __gamma_correction__(self):
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().apply_gamma_correction()
 
     def __histogram_equalize__(self):
-        # self.result_image = gt.histogramEqualize(self.result_image)
-        # self.result_viewer.load_image(self.result_image)
-        self.mdi_area.currentSubWindow().apply_histogram_equalize()
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().apply_histogram_equalize()
 
     def __contrast_auto_adjust__(self):
-        self.result_image = gt.contrastAutoAdjust(self.result_image)
-        self.result_viewer.load_image(self.result_image)
-
-
-class ImageMdi(QtWidgets.QMdiSubWindow):
-    def __init__(self, parent, file_path, is_main=True, image=None):
-        super(ImageMdi, self).__init__(parent)
-        self.parent = parent
-
-        self._is_main = is_main
-        self.file_path = file_path
-
-        self.__setup_window__()
-
-        if image is None:
-            self.__open_image__()
-        else:
-            self.image = image
-
-        self.show_image()
-        self.show()
-
-        if self._is_main:
-            self._sub_result = ImageMdi(self.parent,
-                                        self.file_path,
-                                        False, self.image)
-        else:
-            self._change_history = deque()
-            self._file_changed = False
-
-    def show_image(self):
-        height, width, channel = self.image.shape
-
-        bytes_per_line = channel * width
-        qimage = QtGui.QImage(self.image, width, height,
-                              bytes_per_line,
-                              QtGui.QImage.Format_ARGB32)
-
-        pixmap = QtGui.QPixmap.fromImage(qimage)
-
-        self.canvas.setPixmap(pixmap)
-
-        self.canvas.setFixedSize(width, height)
-        self.canvas.setMaximumSize(width, height)
-        self.resize(width + 30, height + 50)
-        self.repaint()
-
-    def __open_image__(self):
-        image = QtGui.QImage(self.file_path)
-
-        if image.format() != QtGui.QImage.Format_ARGB32:
-            image.convertTo(QtGui.QImage.Format_ARGB32)
-
-        width = image.width()
-        height = image.height()
-
-        ptr = image.bits()
-        ptr.setsize(height * width * 4)
-
-        self.image = np.frombuffer(ptr, np.uint8).reshape((height, width, 4))
-        self.qimage = image
-
-    def __setup_window__(self):
-        flags = QtCore.Qt.WindowTitleHint if self._is_main else QtCore.Qt.CustomizeWindowHint
-        self.parent.addSubWindow(self, flags)
-
-        _, file_name = os.path.split(self.file_path)
-        win_type = "Result: " if not self._is_main else ""
-
-        self.setWindowTitle(win_type + file_name)
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-
-        self.content = QtWidgets.QWidget(self)
-
-        layout = QtWidgets.QGridLayout(self.content)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        self.canvas = QtWidgets.QLabel(self)
-        layout.addWidget(self.canvas, 0, 0, 1, 1)
-
-        self.setWidget(self.content)
-
-    def save(self):
-        pass
-
-    def closeEvent(self, event):
-        if self._sub_result._file_changed:
-            choice = QtWidgets.QMessageBox.question(self.parent, "File not save!",
-                                                    "File {} was not save!\n Do you want to Save change?".format(
-                                                        self.file_path),
-                                                    QtWidgets.QMessageBox.Save |
-                                                    QtWidgets.QMessageBox.Discard |
-                                                    QtWidgets.QMessageBox.Cancel)
-
-            print(choice)
-            if choice == QtWidgets.QMessageBox.Cancel:
-                event.ignore()
-                return
-            elif choice == QtWidgets.QMessageBox.Save:
-                self._sub_result.save()
-
-        self._sub_result.close()
-
-    def apply_histogram_equalize(self):
-        if self._is_main:
-            self._sub_result.apply_histogram_equalize()
-        else:
-            self.image = gt.histogramEqualize(
-                self.image, adaptive_size=(128, 128))
-            self.show_image()
+        if len(self._child) > 0:
+            self.mdi_area.currentSubWindow().apply_contrast_auto_adjust()
+    
 
 
 class SliderMdi(QtWidgets.QMdiSubWindow):

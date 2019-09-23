@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="icon">
+    <file>img/dark/reset.svg</file>
+    <file>img/dark/rotateL.svg</file>
+    <file>img/dark/rotateR.svg</file>
     <file>img/dark/save_alt.svg</file>
     <file>img/dark/restore.svg</file>
     <file>img/dark/contrast.svg</file>
