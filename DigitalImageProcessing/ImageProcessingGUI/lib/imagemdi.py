@@ -279,5 +279,5 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
             self._result.apply_unsharp_mask_filter()
         else:
             image = DotDict(self.image)
-            image.rgb = sdf.unsharpMaskFilter(self.image.rgb)
+            image.rgb = sdf.unsharpMaskFilter(self.image.rgb, 'laplacian')
             self.__set_image__(image)
