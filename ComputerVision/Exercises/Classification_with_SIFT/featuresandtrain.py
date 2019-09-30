@@ -14,49 +14,16 @@ import h5py
 # --------------------
 images_per_class = 80
 fixed_size = tuple((500, 500))
-train_path = "dataset/train"
+train_path = "train"
 h5_data = 'output/data.h5'
 h5_labels = 'output/labels.h5'
 bins = 8
-
-
-# feature-descriptor-1: Hu Moments
-def fd_hu_moments(image):
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    feature = cv2.HuMoments(cv2.moments(image)).flatten()
-    return feature
-
-# feature-descriptor-2: Haralick Texture
-
-
-def fd_haralick(image):
-    # convert the image to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # compute the haralick texture feature vector
-    haralick = mahotas.features.haralick(gray).mean(axis=0)
-    # return the result
-    return haralick
-
-# feature-descriptor-3: Color Histogram
-
-
-def fd_histogram(image, mask=None):
-    # convert the image to HSV color-space
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    # compute the color histogram
-    hist = cv2.calcHist([image], [0, 1, 2], None, [
-                        bins, bins, bins], [0, 256, 0, 256, 0, 256])
-    # normalize the histogram
-    cv2.normalize(hist, hist)
-    # return the histogram
-    return hist.flatten()
-
 
 def fd_sift(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     kps, des = sift.detectAndCompute(image, None)
-    return des if des is not None else np.array([]).reshape(0, 128)
+    return des.flatten().tolist() if des is not None else np.array([]).reshape(0, 128).flatten().tolist()
 
 
 # get the training labels
@@ -91,15 +58,12 @@ for training_name in train_labels:
         ####################################
         # Global Feature extraction
         ####################################
-        fv_hu_moments = fd_hu_moments(image)
-        fv_haralick = fd_haralick(image)
-        fv_histogram = fd_histogram(image)
         fv_sift = fd_sift(image)
 
         ###################################
         # Concatenate global features
         ###################################
-        global_feature = np.hstack([fv_histogram, fv_haralick, fv_hu_moments])
+        global_feature = fv_sift
 
         # update the list of labels and feature vectors
         labels.append(current_label)
@@ -112,6 +76,7 @@ print("[STATUS] completed Global Feature Extraction...")
 # get the overall feature vector size
 print("[STATUS] feature vector size {}".format(
     np.array(global_features).shape))
+print(global_features)
 
 # get the overall training label size
 print("[STATUS] training Labels {}".format(np.array(labels).shape))
