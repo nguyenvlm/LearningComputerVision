@@ -14,7 +14,7 @@ def directionalMeanFilter(image, dir=0, size=3):
     else:
         kernel = np.diag(np.ones(size))/size
     if dir >= 2:
-        kernel = np.transpose(kernel)
+        kernel = np.rot90(kernel)
     
     return np.uint8(cv2.filter2D(src=image, ddepth=-1, kernel=kernel))
 
