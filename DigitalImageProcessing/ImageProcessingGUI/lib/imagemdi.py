@@ -102,6 +102,7 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
             if not is_redo:
                 self._redo_stack = []
 
+        self._file_changed = True
         self.image = image
         self.__show_image__()
 
@@ -167,7 +168,7 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
             image = self._raw.image
             self.__set_image__(image)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event):cmd
         if self._is_main and self._result._file_changed:
             choice = QtWidgets.QMessageBox.question(self.parent, "File not save!",
                                                     "File {} was not save!\n Do you want to Save change?".format(
@@ -216,7 +217,6 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
             image = DotDict(self.image)
             image.rgb = gt.expoTransform(self.image.rgb)
             self.__set_image__(image)
-            
     
     def apply_invert_color(self):
         if self._is_main:
