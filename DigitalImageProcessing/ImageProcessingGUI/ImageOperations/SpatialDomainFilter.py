@@ -50,5 +50,5 @@ def unsharpMaskFilter(image, mask='gaussian'):
     return np.uint8(cv2.addWeighted(image, alpha, mask_dict[mask](image), -1, 0))
 
 if __name__ == "__main__":
-    img = cv2.imread("hello.jpg")
-    cv2.imwrite("output.jpg", unsharpMaskFilter(img, 'laplacian'))
+    img = cv2.imread("../sample/hello.jpg")
+    cv2.imwrite("../sample/output/output.jpg", unsharpMaskFilter(img, 'laplacian'))
