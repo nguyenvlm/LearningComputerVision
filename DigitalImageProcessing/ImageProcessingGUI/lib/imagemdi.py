@@ -281,3 +281,12 @@ class ImageMdi(QtWidgets.QMdiSubWindow):
             image = DotDict(self.image)
             image.rgb = sdf.unsharpMaskFilter(self.image.rgb, 'laplacian')
             self.__set_image__(image)
+
+    def apply_discrete_fourier_tranform(self):
+        pass
+
+    def apply_butterworth_low_pass(self):
+        pass
+
+    def apply_butterworth_high_pass(self):
+        pass

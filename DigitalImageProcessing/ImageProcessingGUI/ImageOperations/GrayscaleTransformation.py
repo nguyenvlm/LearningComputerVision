@@ -48,4 +48,4 @@ def histogramEqualize(image, stride=2, adaptive_size='full'):
 
 if __name__ == "__main__":
     img = cv2.imread("../sample/hello.jpg")
-    cv2.imwrite("../sample/output/output.jpg", histogramEqualize(img, (2, 1)))
+    cv2.imwrite("../output/output.jpg", histogramEqualize(img, (2, 1)))

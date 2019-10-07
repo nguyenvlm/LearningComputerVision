@@ -6,8 +6,8 @@ def meanFilter(image):
     meanMatrix = np.ones((3,3), np.float32)/9
     return np.uint8(cv2.filter2D(src=image, ddepth=-1, kernel=meanMatrix))
 
-def medianFilter(image):
-    return np.uint8(cv2.medianBlur(src=image, ksize=3))
+def medianFilter(image, size=3):
+    return np.uint8(cv2.medianBlur(src=image, ksize=size))
 
 def gaussianFilter(image, sigma=0.5):
     gaussianMatrix = cv2.getGaussianKernel(ksize=3, sigma=sigma)
@@ -50,5 +50,5 @@ def unsharpMaskFilter(image, mask='gaussian'):
     return np.uint8(cv2.addWeighted(image, alpha, mask_dict[mask](image), -1, 0))
 
 if __name__ == "__main__":
-    img = cv2.imread("../sample/hello.jpg")
-    cv2.imwrite("../sample/output/output.jpg", unsharpMaskFilter(img, 'laplacian'))
+    img = cv2.imread("../sample/hw4_radiograph_2.jpg")
+    cv2.imwrite("../output/output.jpg", medianFilter(img, 19))

@@ -269,19 +269,15 @@ class MainWindow(QtWidgets.QWidget, Ui_main_window):
     def __convert_grayscale__(self):
         if len(self._child) > 0:
             self.mdi_area.currentSubWindow().apply_grayscale()
-
     def __invert_color__(self):
         if len(self._child) > 0:
             self.mdi_area.currentSubWindow().apply_invert_color()
-
     def __gamma_correction__(self):
         if len(self._child) > 0:
             self.mdi_area.currentSubWindow().apply_gamma_correction()
-
     def __histogram_equalize__(self):
         if len(self._child) > 0:
             self.mdi_area.currentSubWindow().apply_histogram_equalize()
-
     def __contrast_auto_adjust__(self):
         if len(self._child) > 0:
             self.mdi_area.currentSubWindow().apply_contrast_auto_adjust()
